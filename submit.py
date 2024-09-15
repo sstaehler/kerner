@@ -213,7 +213,7 @@ def define_arguments():
                "with MPIRUN"
     parser.add_argument('-q', '--queue',
                         choices=['SuperMUC', 'background', 'foreground',
-                                 'monch'],
+                                 'monch', 'torque'],
                         default='background',
                         help=helptext)
 
@@ -790,7 +790,34 @@ if args.queue == 'foreground':
     run_cmd = cmd_string % (mpirun_cmd, args.nslaves + 1)
     print('Starting local job in %s' % run_dir)
     subprocess.check_call(run_cmd, shell=True)
-
+    
+if args.queue == 'torque':
+    # Create a .pbs submission script for archer
+    job_script = os.path.join(run_dir, 'submit_job.pbs')
+    if not args.tasks_per_node:
+        tasks_per_node = 24
+    else:
+        tasks_per_node = args.tasks_per_node
+    nodes = math.ceil((args.nslaves)/tasks_per_node)
+    with open(job_script, 'w') as f:
+        text_out = "#! /bin/bash --login \n"
+        text_out += "#PBS -l select=%s \n" % str(int(nodes))
+        text_out += "#PBS -l walltime=%s:00:00 \n" % str(args.wall_time)
+        text_out += "#PBS -A n03-ox2 \n"
+        text_out += "cd %s \n" % run_dir
+        text_out += "module unload PrgEnv-cray/5.2.82 \n"
+        text_out += "module load PrgEnv-gnu \n"
+        text_out += "module load fftw \n"
+        text_out += "module load cray-netcdf-hdf5parallel/4.4.1.1 \n"
+        text_out += "module load atp \n"
+        text_out += "module load doxygen/1.8.4 \n"
+        text_out += "export ATP_ENABLED=1 \n"
+        text_out += "ulimit -s unlimited \n"
+        text_out += "aprun -n %s %s/mc_kernel inparam \n" % (str(args.nslaves), run_dir)
+        f.write(text_out)
+    os.chdir(run_dir)
+    subprocess.call(['qsub', job_script])    
+    
 elif args.queue == 'SuperMUC':
     # Create a LoadLeveler job script for SuperMUC
 
