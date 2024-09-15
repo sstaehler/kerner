@@ -420,6 +420,15 @@ function slave_work(parameters, sem_data, inv_mesh, fft_data, het_model) result(
   allocate(weights(nptperstep))
   allocate(int_kernel(nbasisfuncs_per_elem))
 
+  if (parameters%int_over_background) then
+    allocate(int_model(nbasisfuncs_per_elem))
+  end if
+
+
+  if (parameters%int_over_hetero) then
+    allocate(int_hetero(nbasisfuncs_per_elem))
+  end if
+
   iclockold = tick(id=id_init, since=iclockold)
 
   loop_elements: do ielement = 1, nelements 
@@ -838,6 +847,9 @@ function integrate_1d_model(sem_data, inv_mesh, ielement) result(int_model)
 
   nbasisfuncs_per_elem = inv_mesh%nbasisfuncs_per_elem
   allocate(int_model(nbasisfuncs_per_elem))
+  allocate(random_points(3, nptperstep_model))
+  allocate(model_random_points(nmodel_parameters, nptperstep_model))
+
 
   !  Calculate integrated model parameters for this element
   write(lu_out,'(A)', advance='no') ' Integrate model parameters...' 
@@ -893,6 +905,8 @@ function integrate_3d_model(het_model, inv_mesh, ielement) result(int_hetero)
 
   nbasisfuncs_per_elem = inv_mesh%nbasisfuncs_per_elem
   allocate(int_hetero(nbasisfuncs_per_elem))
+  allocate(random_points(3,nptperstep_model))
+  allocate(hetero_random_points(nmodel_parameters_hetero,nptperstep_model))
 
 
   write(lu_out,'(A)', advance='no') ' Integrate heterogeneities... '
