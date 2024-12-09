@@ -45,7 +45,7 @@ before_install:
   - pip install --user cpp-coveralls
 
   # Get test wavefields (2GB, takes some time)
-  - ./TRAVIS/get_wavefields.sh
+  - travis_wait 30 ./TRAVIS/get_wavefields.sh
   #   cd tests/reference_solutions 
   #   tar -xvf test_nonmerged.tar
   #   tar -xvf test_merged.tar

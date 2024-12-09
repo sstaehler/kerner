@@ -11,7 +11,7 @@ else
   # Download from gdrive is much faster (50-100MB/s) than from LMU (<10 MB/s),
   # but pull requests from other github accounts than seismology will not have
   # access to it. 
-  wget https://polybox.ethz.ch/index.php/s/35W6wls9ARpUHiD/download
+  wget -q https://polybox.ethz.ch/index.php/s/35W6wls9ARpUHiD/download -O kerner_wavefields.tar.bz2
   tar -xvf kerner_wavefields.tar.bz2
 
   # if [ $encrypted_50ebf69bd92e_key == "" ]; then
